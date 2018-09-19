@@ -194,7 +194,7 @@ public class EasyIngestAction implements IAction {
                 LOG.info("Checking deposit status ... of " + filename);
                 response = http.execute(new HttpGet(statUri));
                 int rc = response.getStatusLine().getStatusCode();
-                LOG.info("response code: {}" + rc);
+                LOG.info("response code: {}", rc);
                 if (rc != HTTP_OK) {
                     String errMsg = "Status code != 200 (HTTP_OK).  statUri: " + statUri + ". Response: " + response.getEntity().getContent();
                     LOG.error(errMsg);
