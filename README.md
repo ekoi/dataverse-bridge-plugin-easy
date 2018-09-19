@@ -9,6 +9,7 @@ Prerequisites:
 
 * Java 8 or higher
 * Maven 3.3.3 or higher
+* [dataverse-bridge-plugin-lib](https://github.com/DANS-KNAW/dataverse-bridge-plugin-lib)
 
 Steps:
 

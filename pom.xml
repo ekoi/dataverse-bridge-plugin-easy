@@ -4,7 +4,7 @@
     <groupId>nl.knaw.dans.dataverse.bridge.plugin.tdr.easy</groupId>
     <artifactId>bridge-plugin-easy</artifactId>
     <packaging>jar</packaging>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.7</version>
     <name>bridge-plugin-easy</name>
     <properties>
         <java.version>1.8</java.version>
