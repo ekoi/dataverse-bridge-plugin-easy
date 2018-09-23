@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +32,7 @@ import java.util.Map;
     @author Eko Indarto
  */
 public class EasyBagComposer implements IBagitComposer {
-    private static final Logger LOG = LoggerFactory.getLogger(EasyBagComposer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private Path bagitDir;
     private Path bagTempDir;
 

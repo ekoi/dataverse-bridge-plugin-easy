@@ -27,6 +27,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.Optional;
     @author Eko Indarto
  */
 public class EasyTransformer implements ITransform {
-    private static final Logger LOG = LoggerFactory.getLogger(EasyTransformer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private Templates cachedXSLTDataset;
     private String dvDdiMetadataUrl;
     private Templates cachedXSLTFiles;

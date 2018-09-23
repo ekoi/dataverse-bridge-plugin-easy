@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.DigestInputStream;
@@ -35,15 +36,15 @@ import static java.net.HttpURLConnection.HTTP_OK;
     @author Eko Indarto
  */
 public class EasyIngestAction implements IAction {
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private ITransform iTransform = new EasyTransformer();
-    private static final Logger LOG = LoggerFactory.getLogger(EasyIngestAction.class);
     private static final int TIMEOUT = 600000; //10 minutes
     private static final int CHUNK_SIZE = 104857600;//100MB
 
     @Override
-    public Map<String, String> transform(String ddiExportUrl, String apiToken, List<XslStreamSource> xslStreamSource) throws BridgeException {
+    public Optional<Map<String, String>> transform(String ddiExportUrl, String apiToken, List<XslStreamSource> xslStreamSource) throws BridgeException {
         iTransform = new EasyTransformer();
-        return iTransform.getTransformResult(ddiExportUrl, apiToken, xslStreamSource);
+        return Optional.of(iTransform.getTransformResult(ddiExportUrl, apiToken, xslStreamSource));
     }
 
     @Override
@@ -56,7 +57,7 @@ public class EasyIngestAction implements IAction {
     }
 
     @Override
-    public EasyResponseDataHolder execute(Optional<File> baggitZippedFileOpt, IRI colIri, String uid, Optional<String> pwd) throws BridgeException {
+    public EasyResponseDataHolder execute(Optional<File> baggitZippedFileOpt, IRI colIri, String uid, String pwd) throws BridgeException {
         EasyResponseDataHolder easyResponseDataHolder;
         long checkingTimePeriod = 5000;
         try {
@@ -73,7 +74,7 @@ public class EasyIngestAction implements IAction {
 
             DigestInputStream dis = getDigestInputStream(bagitZippedFile);
 
-            CloseableHttpClient http = BridgeHelper.createHttpClient(colIri.toURI(), uid, pwd.get(), TIMEOUT);
+            CloseableHttpClient http = BridgeHelper.createHttpClient(colIri.toURI(), uid, pwd, TIMEOUT);
             CloseableHttpResponse response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", colIri.toURI(), "bag.zip.1", "application/octet-stream", http,
                     CHUNK_SIZE < bagitZippedFileSize);
 
@@ -124,7 +125,7 @@ public class EasyIngestAction implements IAction {
             IRI statIri = statLink.getHref();
             LOG.info("Stat-IRI = " + statIri);
             easyResponseDataHolder = trackDeposit(http, statIri.toURI(), checkingTimePeriod, bagitZippedFile.getName());
-            LOG.info(easyResponseDataHolder.getState());
+            LOG.info(easyResponseDataHolder.getState().get());
         } catch (FileNotFoundException e) {
             LOG.error("FileNotFoundException: " + e.getMessage());
             throw new BridgeException("execute - FileNotFoundException, msg: " + e.getMessage(), e, this.getClass());
@@ -201,7 +202,7 @@ public class EasyIngestAction implements IAction {
                     throw new BridgeException(errMsg, this.getClass());
                 }
                 easyResponseDataHolder = new EasyResponseDataHolder(response.getEntity().getContent());
-                String state = easyResponseDataHolder.getState();
+                String state = easyResponseDataHolder.getState().get();
                 LOG.info("[{}] Response state from EASY: {}", filename, state);
                 if (state.equals(StateEnum.ARCHIVED.toString()) || state.equals(StateEnum.INVALID.toString())
                         || state.equals(StateEnum.REJECTED.toString()) || state.equals(StateEnum.FAILED.toString()))

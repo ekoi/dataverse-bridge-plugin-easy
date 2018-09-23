@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,7 +14,7 @@ import java.net.URL;
  * @author: Eko Indarto
  */
 public class FilePermissionChecker {
-    private static final Logger LOG = LoggerFactory.getLogger(FilePermissionChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static PermissionStatus check(String url) throws BridgeException {
         URL validUrl;

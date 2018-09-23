@@ -2,6 +2,7 @@ package nl.knaw.dans.dataverse.bridge.plugin.dar.easy;
 
 import nl.knaw.dans.dataverse.bridge.plugin.exception.BridgeException;
 import nl.knaw.dans.dataverse.bridge.plugin.util.StateEnum;
+import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Category;
 import org.apache.abdera.model.Document;
 import org.apache.abdera.model.Entry;
@@ -14,22 +15,30 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 
-public class EasyResponseDataHolder extends nl.knaw.dans.dataverse.bridge.plugin.common.ResponseDataHolder {
-    private static final Logger LOG = LoggerFactory.getLogger(EasyResponseDataHolder.class);
+public class EasyResponseDataHolder implements nl.knaw.dans.dataverse.bridge.plugin.common.IResponseData {
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private String state;
     private String pid;
     private String landingPage;
     private String feedXml;
+    private static Abdera abdera = null;
+
+    private static synchronized Abdera getInstance() {
+        if (abdera == null) {
+            abdera = new Abdera();
+        }
+        return abdera;
+    }
 
     public EasyResponseDataHolder(InputStream content) throws BridgeException {
         init(content);
     }
 
-    @Override
-    public void init(InputStream inputStream) throws BridgeException {
+    private void init(InputStream inputStream) throws BridgeException {
         try {
             feedXml = IOUtils.toString(inputStream, "UTF-8");
             //Eko says, we can validate the feedXml by using javax.xml.validation.Validator
@@ -68,8 +77,13 @@ public class EasyResponseDataHolder extends nl.knaw.dans.dataverse.bridge.plugin
     }
 
     @Override
-    public String getState() {
-        return state;
+    public String getResponse() {
+        return feedXml;
+    }
+
+    @Override
+    public Optional<String> getState() {
+        return Optional.of(state);
     }
 
     @Override
@@ -80,11 +94,6 @@ public class EasyResponseDataHolder extends nl.knaw.dans.dataverse.bridge.plugin
     @Override
     public Optional<String> getLandingPage() {
         return Optional.of(landingPage);
-    }
-
-    @Override
-    public Optional<String> getFeedXml() {
-        return Optional.of(feedXml);
     }
 
 }
