@@ -2,6 +2,7 @@ package nl.knaw.dans.dataverse.bridge.plugin.dar.easy;
 
 import nl.knaw.dans.dataverse.bridge.plugin.common.DvFileList;
 import nl.knaw.dans.dataverse.bridge.plugin.common.ITransform;
+import nl.knaw.dans.dataverse.bridge.plugin.common.SourceDar;
 import nl.knaw.dans.dataverse.bridge.plugin.common.XslStreamSource;
 import nl.knaw.dans.dataverse.bridge.plugin.dar.easy.util.FilePermissionChecker;
 import nl.knaw.dans.dataverse.bridge.plugin.exception.BridgeException;
@@ -48,8 +49,8 @@ public class EasyTransformer implements ITransform {
     private final Map<String, String> publicFiles = new HashMap<>();
 
     @Override
-    public Map<String, String> getTransformResult(String dvDdiMetadataUrl, String apiToken, List<XslStreamSource> xslStreamSourceList) throws BridgeException {
-        this.dvDdiMetadataUrl = dvDdiMetadataUrl;
+    public Map<String, String> transformMetadata(SourceDar sourceDar, List<XslStreamSource> xslStreamSourceList) throws BridgeException {
+        this.dvDdiMetadataUrl = sourceDar.getMetadataExportUrl();
         init(xslStreamSourceList);
         build();
         Map<String, String> transformResult = new HashMap<>();

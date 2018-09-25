@@ -37,11 +37,11 @@ public class EasyBagComposer implements IBagitComposer {
     private Path bagTempDir;
 
     @Override
-    public File buildBag(String bagitBaseDir, String srcExportedUrl, Map<String, String> transformedXml, DvFileList dvFileList) throws BridgeException {
-        LOG.info("Build bag....  Bagit base dir: " + bagitBaseDir);
+    public File buildBag(String bagitBaseDir, String ddiExportedUrl, Map<String, String> transformedXml, DvFileList dvFileList) throws BridgeException {
+        LOG.info("Build bag....  Bagit base dir: {}  ddiExportedUrl: {}" + bagitBaseDir, ddiExportedUrl);
         bagTempDir = createTempDirectory(bagitBaseDir);
         Path metadataDir = createMetadataDir();
-        createDdiAndJsonXml(srcExportedUrl);
+        createDdiAndJsonXml(ddiExportedUrl);
         createDatasetXmlFile(metadataDir, transformedXml.get("dataset.xml"));
         createFilesXmlFile(metadataDir, transformedXml.get("files.xml"));
         downloadFiles(dvFileList);

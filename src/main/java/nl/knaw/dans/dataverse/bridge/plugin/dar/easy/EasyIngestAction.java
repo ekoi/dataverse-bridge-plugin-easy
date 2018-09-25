@@ -42,22 +42,22 @@ public class EasyIngestAction implements IAction {
     private static final int CHUNK_SIZE = 104857600;//100MB
 
     @Override
-    public Optional<Map<String, String>> transform(String ddiExportUrl, String apiToken, List<XslStreamSource> xslStreamSource) throws BridgeException {
+    public Optional<Map<String, String>> transform(SourceDar sourceDar, List<XslStreamSource> xslStreamSource) throws BridgeException {
         iTransform = new EasyTransformer();
-        return Optional.of(iTransform.getTransformResult(ddiExportUrl, apiToken, xslStreamSource));
+        return Optional.of(iTransform.transformMetadata(sourceDar, xslStreamSource));
     }
 
     @Override
-    public Optional<File> composeBagit(String bagitBaseDir, String apiToken, String ddiExportUrl, Map<String, String> transformedXml) throws BridgeException {
+    public Optional<File> composeBagit(SourceDar sourceDar, String bagitBaseDir, Map<String, String> transformedMetadata) throws BridgeException {
         LOG.info("Trying to compose bagit...");
         IBagitComposer iBagitComposer = new EasyBagComposer();
-        DvFileList dvFileList = iTransform.getDvFileList(apiToken).get();
-        File bagitFile = iBagitComposer.buildBag(bagitBaseDir, ddiExportUrl, transformedXml, dvFileList);
+        DvFileList dvFileList = iTransform.getDvFileList(sourceDar.getApiToken()).get();
+        File bagitFile = iBagitComposer.buildBag(bagitBaseDir, sourceDar.getMetadataExportUrl(), transformedMetadata, dvFileList);
         return Optional.of(bagitFile);
     }
 
     @Override
-    public EasyResponseDataHolder execute(Optional<File> baggitZippedFileOpt, IRI colIri, String uid, String pwd) throws BridgeException {
+    public EasyResponseDataHolder execute(TargetDar targetDar, Optional<File> baggitZippedFileOpt, Optional<Map<String, String>> transformedMetadata) throws BridgeException {
         EasyResponseDataHolder easyResponseDataHolder;
         long checkingTimePeriod = 5000;
         try {
@@ -74,8 +74,8 @@ public class EasyIngestAction implements IAction {
 
             DigestInputStream dis = getDigestInputStream(bagitZippedFile);
 
-            CloseableHttpClient http = BridgeHelper.createHttpClient(colIri.toURI(), uid, pwd, TIMEOUT);
-            CloseableHttpResponse response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", colIri.toURI(), "bag.zip.1", "application/octet-stream", http,
+            CloseableHttpClient http = BridgeHelper.createHttpClient(targetDar.getDarIri().toURI(), targetDar.getDarUid(), targetDar.getDarPwd(), TIMEOUT);
+            CloseableHttpResponse response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", targetDar.getDarIri().toURI(), "bag.zip.1", "application/octet-stream", http,
                     CHUNK_SIZE < bagitZippedFileSize);
 
             String bodyText = BridgeHelper.readEntityAsString(response.getEntity());
