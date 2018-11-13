@@ -1,0 +1,270 @@
+{
+  "id": 16,
+  "identifier": "hkdsa",
+  "persistentUrl": "https://hdl.handle.net/101204/hkdsa",
+  "protocol": "hdl",
+  "authority": "101204",
+  "publisher": "Root",
+  "publicationDate": "2018-11-08",
+  "datasetVersion": {
+    "id": 33,
+    "versionNumber": 2,
+    "versionMinorNumber": 0,
+    "versionState": "RELEASED",
+    "productionDate": "Production Date",
+    "lastUpdateTime": "2018-11-08T13:57:30Z",
+    "releaseTime": "2018-11-08T13:57:30Z",
+    "createTime": "2018-11-08T13:55:24Z",
+    "license": "CC0",
+    "termsOfUse": "CC0 Waiver",
+    "metadataBlocks": {"citation": {
+      "displayName": "Citation Metadata",
+      "fields": [
+        {
+          "typeName": "title",
+          "multiple": false,
+          "typeClass": "primitive",
+          "value": "The broken four leaf clover"
+        },
+        {
+          "typeName": "author",
+          "multiple": true,
+          "typeClass": "compound",
+          "value": [{
+            "authorName": {
+              "typeName": "authorName",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "Indarto, Amal"
+            },
+            "authorAffiliation": {
+              "typeName": "authorAffiliation",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "AMALIN"
+            }
+          }]
+        },
+        {
+          "typeName": "datasetContact",
+          "multiple": true,
+          "typeClass": "compound",
+          "value": [{
+            "datasetContactName": {
+              "typeName": "datasetContactName",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "Indarto, Amal"
+            },
+            "datasetContactAffiliation": {
+              "typeName": "datasetContactAffiliation",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "amalin.nl"
+            }
+          }]
+        },
+        {
+          "typeName": "dsDescription",
+          "multiple": true,
+          "typeClass": "compound",
+          "value": [{"dsDescriptionValue": {
+            "typeName": "dsDescriptionValue",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "Je klikt je kettinkje aan de ander vast,\r\nmeteen voel je dat iets van je afvalt, een grote last. Je bent weer bij elkaar,\r\nje hebt geen bezwaar.\r\nHet is weer goed,\r\nhet geluk komt je weer tegemoet\r\nJe bent weer samen,\r\nje noemt elkaar eindelijk weer bij namen...\r\n"
+          }}]
+        },
+        {
+          "typeName": "subject",
+          "multiple": true,
+          "typeClass": "controlledVocabulary",
+          "value": [
+            "Arts and Humanities",
+            "Social Sciences"
+          ]
+        },
+        {
+          "typeName": "keyword",
+          "multiple": true,
+          "typeClass": "compound",
+          "value": [{
+            "keywordVocabulary": {
+              "typeName": "keywordVocabulary",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "Plant morphology"
+            },
+            "keywordValue": {
+              "typeName": "keywordValue",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "leaf"
+            },
+            "keywordVocabularyURI": {
+              "typeName": "keywordVocabularyURI",
+              "multiple": false,
+              "typeClass": "primitive",
+              "value": "https://en.wikipedia.org/wiki/Leaf"
+            }
+          }]
+        },
+        {
+          "typeName": "publication",
+          "multiple": true,
+          "typeClass": "compound",
+          "value": [{"publicationCitation": {
+            "typeName": "publicationCitation",
+            "multiple": false,
+            "typeClass": "primitive",
+            "value": "https://www.amazon.de/Het-klavertje-dat-steeds-afbrak/dp/9082713403\r\nhttps://www.ad.nl/eindhoven/twaalfjarige-amal-indarto-uit-eindhoven-schreef-eigen-boek~a2927976/"
+          }}]
+        },
+        {
+          "typeName": "notesText",
+          "multiple": false,
+          "typeClass": "primitive",
+          "value": "(You connect, you feel liberated, the heavy burden removed. You are reunited once more,\r\nno more obstacles.\r\nEverything is as it should be,\r\nyou feel happiness again.\r\nTogether, once more\r\nfinally, you call each other by name...)"
+        },
+        {
+          "typeName": "language",
+          "multiple": true,
+          "typeClass": "controlledVocabulary",
+          "value": [
+            "Dutch",
+            "English"
+          ]
+        },
+        {
+          "typeName": "depositor",
+          "multiple": false,
+          "typeClass": "primitive",
+          "value": "Indarto, Eko"
+        },
+        {
+          "typeName": "dateOfDeposit",
+          "multiple": false,
+          "typeClass": "primitive",
+          "value": "2018-11-08"
+        }
+      ]
+    },
+      "geospatial": {
+        "displayName": "Geospatial Metadata",
+        "fields": [
+          {
+            "typeName": "geographicCoverage",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [{
+              "country": {
+                "typeName": "country",
+                "multiple": false,
+                "typeClass": "controlledVocabulary",
+                "value": "Bahamas"
+              },
+              "state": {
+                "typeName": "state",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "Provincie1"
+              },
+              "city": {
+                "typeName": "city",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "Antwerpen"
+              },
+              "otherGeographicCoverage": {
+                "typeName": "otherGeographicCoverage",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "Anders?"
+              }
+            }]
+          },
+          {
+            "typeName": "geographicUnit",
+            "multiple": true,
+            "typeClass": "primitive",
+            "value": ["geographic unit - Village"]
+          },
+          {
+            "typeName": "geographicBoundingBox",
+            "multiple": true,
+            "typeClass": "compound",
+            "value": [{
+              "westLongitude": {
+                "typeName": "westLongitude",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "1111"
+              },
+              "eastLongitude": {
+                "typeName": "eastLongitude",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "2222"
+              },
+              "northLongitude": {
+                "typeName": "northLongitude",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "3333"
+              },
+              "southLongitude": {
+                "typeName": "southLongitude",
+                "multiple": false,
+                "typeClass": "primitive",
+                "value": "4444"
+              }
+            }]
+          }
+        ]
+      }
+    },
+    "files": [
+      {
+        "label": "cover-achter.jpg",
+        "restricted": true,
+        "version": 1,
+        "datasetVersionId": 33,
+        "dataFile": {
+          "id": 19,
+          "filename": "cover-achter.jpg",
+          "contentType": "image/jpeg",
+          "filesize": 110918,
+          "storageIdentifier": "166f39c70be-d1f455635a3a",
+          "originalFormatLabel": "UNKNOWN",
+          "rootDataFileId": -1,
+          "md5": "f6c7fb34465e4c447e189c4be8668ac4",
+          "checksum": {
+            "type": "MD5",
+            "value": "f6c7fb34465e4c447e189c4be8668ac4"
+          }
+        }
+      },
+      {
+        "label": "cover-voor.jpg",
+        "restricted": false,
+        "version": 1,
+        "datasetVersionId": 33,
+        "dataFile": {
+          "id": 20,
+          "filename": "cover-voor.jpg",
+          "contentType": "image/jpeg",
+          "filesize": 86394,
+          "storageIdentifier": "166f39cb06f-55b23ba23a91",
+          "originalFormatLabel": "UNKNOWN",
+          "rootDataFileId": -1,
+          "md5": "7c8218fd330921218425ea1341f521e2",
+          "checksum": {
+            "type": "MD5",
+            "value": "7c8218fd330921218425ea1341f521e2"
+          }
+        }
+      }
+    ],
+    "citation": "Indarto, Amal, 2018, \"The broken four leaf clover\", https://hdl.handle.net/101204/hkdsa, Root, V2"
+  }
+}

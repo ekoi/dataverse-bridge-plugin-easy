@@ -1,9 +1,9 @@
-package nl.knaw.dans.dataverse.bridge.plugin.dar.easy;
+package nl.knaw.dans.bridge.plugin.dar.easy;
 
-import nl.knaw.dans.dataverse.bridge.plugin.common.*;
-import nl.knaw.dans.dataverse.bridge.plugin.exception.BridgeException;
-import nl.knaw.dans.dataverse.bridge.plugin.util.BridgeHelper;
-import nl.knaw.dans.dataverse.bridge.plugin.util.StateEnum;
+import nl.knaw.dans.bridge.plugin.lib.common.*;
+import nl.knaw.dans.bridge.plugin.lib.exception.BridgeException;
+import nl.knaw.dans.bridge.plugin.lib.util.BridgeHelper;
+import nl.knaw.dans.bridge.plugin.lib.util.StateEnum;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Link;
@@ -24,7 +24,6 @@ import java.net.URISyntaxException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,51 +37,59 @@ import static java.net.HttpURLConnection.HTTP_OK;
 public class EasyIngestAction implements IAction {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private ITransform iTransform = new EasyTransformer();
-    private static final int TIMEOUT = 600000; //10 minutes
-    private static final int CHUNK_SIZE = 104857600;//100MB
+    private static final int TIMEOUT = 600000; //10 minutes. (Consider to put this in a properties file)
+    private static final int CHUNK_SIZE = 104857600;//100MB. (Consider to put this in a properties file)
 
     @Override
-    public Optional<Map<String, String>> transform(SourceDar sourceDar, List<XslStreamSource> xslStreamSource) throws BridgeException {
+    public Optional<Map<String, String>> transform(SourceDar sourceDar, DestinationDar destinationDar, List<XslTransformer> xslStreamSource) throws BridgeException {
         iTransform = new EasyTransformer();
-        return Optional.of(iTransform.transformMetadata(sourceDar, xslStreamSource));
+        return Optional.of(iTransform.transformMetadata(sourceDar, destinationDar, xslStreamSource));
     }
 
     @Override
-    public Optional<File> composeBagit(SourceDar sourceDar, String bagitBaseDir, Map<String, String> transformedMetadata) throws BridgeException {
+    public Optional<File> composeBag(SourceDar sourceDar, String bagitBaseDir, Map<String, String> transformedMetadata) throws BridgeException {
         LOG.info("Trying to compose bagit...");
         IBagitComposer iBagitComposer = new EasyBagComposer();
-        DvFileList dvFileList = iTransform.getDvFileList(sourceDar.getApiToken()).get();
-        File bagitFile = iBagitComposer.buildBag(bagitBaseDir, sourceDar.getMetadataExportUrl(), transformedMetadata, dvFileList);
+        LOG.info("EasyIngestAction - starting iTransform.getSourceFileList");
+        Optional<SourceFileList> sourceFileList = iTransform.getSourceFileList(sourceDar.getApiToken());
+        if (!sourceFileList.isPresent()) {
+            //EASY requires that the original metadata has to include in 'Metadata export from DataverseNL' folder"
+            LOG.error("SourceFileList is not present");
+            throw new BridgeException("SourceFileList is not present", this.getClass());
+        }
+        LOG.info("EasyIngestAction - composeBag sourceFileList: {}", sourceFileList.get());
+        File bagitFile = iBagitComposer.buildBag(bagitBaseDir, sourceDar.getMetadataUrl(), transformedMetadata, sourceFileList.get());
         return Optional.of(bagitFile);
     }
 
     @Override
-    public EasyResponseDataHolder execute(TargetDar targetDar, Optional<File> baggitZippedFileOpt, Optional<Map<String, String>> transformedMetadata) throws BridgeException {
+    public EasyResponseDataHolder execute(DestinationDar destinationDar, Optional<File> baggitZippedFileOpt, Optional<Map<String, String>> transformedMetadata) throws BridgeException {
+
         EasyResponseDataHolder easyResponseDataHolder;
         long checkingTimePeriod = 5000;
         try {
             File bagitZippedFile = baggitZippedFileOpt.get();
-            LOG.info("Trying to ingest '" + bagitZippedFile.getName());
+            LOG.info("Trying to ingest '{}'", bagitZippedFile.getName());
             long bagitZippedFileSize = bagitZippedFile.length();
-            LOG.info("Triying to get MD5 for " + bagitZippedFile.getAbsolutePath());
-            LOG.info(bagitZippedFile.getName() + " has size: " + formatFileSize(bagitZippedFileSize));
+            LOG.info("Triying to get MD5 for {}", bagitZippedFile.getAbsolutePath());
+            LOG.info("{} has size: {}",bagitZippedFile.getName(), BridgeHelper.formatFileSize(bagitZippedFileSize));
             int numberOfChunks = 0;
             if (bagitZippedFileSize > CHUNK_SIZE) {
                 numberOfChunks = getNumberOfChunks(bagitZippedFileSize);
-                LOG.info("The '" + bagitZippedFile.getName() + "' file will send to EASY in partly, " + numberOfChunks + " times, each " + formatFileSize(CHUNK_SIZE));
+                LOG.info("The '{}' file will send to EASY in partly, {} times, each {}", bagitZippedFile.getName(), numberOfChunks, BridgeHelper.formatFileSize(CHUNK_SIZE));
             }
 
             DigestInputStream dis = getDigestInputStream(bagitZippedFile);
 
-            CloseableHttpClient http = BridgeHelper.createHttpClient(targetDar.getDarIri().toURI(), targetDar.getDarUid(), targetDar.getDarPwd(), TIMEOUT);
-            CloseableHttpResponse response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", targetDar.getDarIri().toURI(), "bag.zip.1", "application/octet-stream", http,
+            CloseableHttpClient http = BridgeHelper.createHttpClient(destinationDar.getDarIri().toURI(), destinationDar.getDarUid(), destinationDar.getDarPwd(), TIMEOUT);
+            CloseableHttpResponse response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", destinationDar.getDarIri().toURI(), "bag.zip.1", "application/octet-stream", http,
                     CHUNK_SIZE < bagitZippedFileSize);
 
             String bodyText = BridgeHelper.readEntityAsString(response.getEntity());
             int rc = response.getStatusLine().getStatusCode();
             LOG.info("Response code: {}", rc);
             if (rc != HTTP_CREATED) {
-                LOG.error("FAILED. Status = " + response.getStatusLine());
+                LOG.error("FAILED. Status = {}", response.getStatusLine());
                 LOG.error("Response body follows:");
                 LOG.error(bodyText);
                 throw new BridgeException("Status = " + response.getStatusLine() + ". Response body follows:" + bodyText, this.getClass());
@@ -96,20 +103,20 @@ public class EasyIngestAction implements IAction {
 
             long remaining = bagitZippedFileSize - CHUNK_SIZE;
             if (remaining > 0)
-                LOG.info("Trying to ingest the remaining '" + formatFileSize(remaining));
+                LOG.info("Trying to ingest the remaining '{}'", BridgeHelper.formatFileSize(remaining));
             else
                 LOG.info("Ingesting is finish.");
             int count = 2;
             numberOfChunks --;
             while (remaining > 0) {
                 checkingTimePeriod += 2000;
-                LOG.info("POST-ing chunk of {} to SE-IRI (remaining: {}) ... [{}]", formatFileSize(CHUNK_SIZE), formatFileSize(remaining), numberOfChunks);
+                LOG.info("POST-ing chunk of {} to SE-IRI (remaining: {}) ... [{}]", BridgeHelper.formatFileSize(CHUNK_SIZE), BridgeHelper.formatFileSize(remaining), numberOfChunks);
                 response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", seIri, "bag.zip." + count++, "application/octet-stream", http, remaining > CHUNK_SIZE);
                 numberOfChunks --;
                 remaining -= CHUNK_SIZE;
                 bodyText = BridgeHelper.readEntityAsString(response.getEntity());
                 if (response.getStatusLine().getStatusCode() != HTTP_OK) {
-                    LOG.error("FAILED. Status = " + response.getStatusLine());
+                    LOG.error("FAILED. Status = {}", response.getStatusLine());
                     LOG.error("Response body follows:");
                     LOG.error(bodyText);
                     throw new BridgeException("FAILED. Status = " + response.getStatusLine() + "Response body follows:" + bodyText, this.getClass());
@@ -118,24 +125,25 @@ public class EasyIngestAction implements IAction {
                     LOG.info(bodyText);
                 }
             }
-            LOG.info("****** '" + bagitZippedFile.getName() + "' file is ingested. Now, check the EASY sword process state....");
+            LOG.info("****** '{}' file is ingested. Now, check the EASY sword process state....", bagitZippedFile.getName());
             LOG.info("Retrieving Statement IRI (Stat-IRI) from deposit receipt ...");
             receipt = BridgeHelper.parse(bodyText);
             Link statLink = receipt.getLink("http://purl.org/net/sword/terms/statement");
             IRI statIri = statLink.getHref();
-            LOG.info("Stat-IRI = " + statIri);
+            LOG.info("Stat-IRI = {}", statIri);
             easyResponseDataHolder = trackDeposit(http, statIri.toURI(), checkingTimePeriod, bagitZippedFile.getName());
             LOG.info(easyResponseDataHolder.getState().get());
         } catch (FileNotFoundException e) {
-            LOG.error("FileNotFoundException: " + e.getMessage());
+            LOG.error("FileNotFoundException: {}", e.getMessage());
             throw new BridgeException("execute - FileNotFoundException, msg: " + e.getMessage(), e, this.getClass());
         } catch (NoSuchAlgorithmException e) {
-            LOG.error("NoSuchAlgorithmException: " + e.getMessage());
+            LOG.error("NoSuchAlgorithmException: {}", e.getMessage());
             throw new BridgeException("execute - NoSuchAlgorithmException, msg: " + e.getMessage(), e, this.getClass());
         } catch (URISyntaxException e) {
-            LOG.error("URISyntaxException: " + e.getMessage());
+            LOG.error("URISyntaxException: {}", e.getMessage());
             throw new BridgeException("execute - URISyntaxException, msg: " + e.getMessage(), e, this.getClass());
         } catch (IOException e) {
+            LOG.error("IOException, msg: {}", e.getMessage());
             throw new BridgeException("execute - IOException, msg: " + e.getMessage(), e, this.getClass());
         }
         return easyResponseDataHolder;
@@ -151,31 +159,6 @@ public class EasyIngestAction implements IAction {
         return (numberOfChunk + x);
     }
 
-    private String formatFileSize(long size) {
-        String hrSize;
-
-        double b = size;
-        double k = size/1024.0;
-        double m = ((size/1024.0)/1024.0);
-        double g = (((size/1024.0)/1024.0)/1024.0);
-        double t = ((((size/1024.0)/1024.0)/1024.0)/1024.0);
-
-        DecimalFormat dec = new DecimalFormat("0.00");
-
-        if ( t>1 ) {
-            hrSize = dec.format(t).concat(" TB");
-        } else if ( g>1 ) {
-            hrSize = dec.format(g).concat(" GB");
-        } else if ( m>1 ) {
-            hrSize = dec.format(m).concat(" MB");
-        } else if ( k>1 ) {
-            hrSize = dec.format(k).concat(" KB");
-        } else {
-            hrSize = dec.format(b).concat(" Bytes");
-        }
-
-        return hrSize;
-    }
 
     private DigestInputStream getDigestInputStream(File bagitZipFile) throws FileNotFoundException, NoSuchAlgorithmException {
         FileInputStream fis = new FileInputStream(bagitZipFile);
@@ -187,12 +170,12 @@ public class EasyIngestAction implements IAction {
         //filename is just needed for logging convenient especially when a lot of ingest process in the same time.
         EasyResponseDataHolder easyResponseDataHolder;
         CloseableHttpResponse response;
-        LOG.info("Checking Time Period: " + checkingTimePeriod + " milliseconds.");
+        LOG.info("Checking Time Period: {} milliseconds.", checkingTimePeriod);
         LOG.info("Start polling Stat-IRI for the current status of the deposit, waiting {} milliseconds before every request ...", checkingTimePeriod);
         while (true) {
             try {
                 Thread.sleep(checkingTimePeriod);
-                LOG.info("Checking deposit status ... of " + filename);
+                LOG.info("Checking deposit status ... of '{}'", filename);
                 response = http.execute(new HttpGet(statUri));
                 int rc = response.getStatusLine().getStatusCode();
                 LOG.info("response code: {}", rc);
@@ -208,10 +191,13 @@ public class EasyIngestAction implements IAction {
                         || state.equals(StateEnum.REJECTED.toString()) || state.equals(StateEnum.FAILED.toString()))
                     return easyResponseDataHolder;
             } catch (InterruptedException e) {
+                LOG.error("InterruptedException, msg: {}", e.getMessage());
                 throw new BridgeException("InterruptedException ", e, this.getClass());
             } catch (ClientProtocolException e) {
+                LOG.error("ClientProtocolException, msg: {}", e.getMessage());
                 throw new BridgeException("ClientProtocolException ", e, this.getClass());
             } catch (IOException e) {
+                LOG.error("IOException, msg: {}", e.getMessage());
                 throw new BridgeException("IOException ", e, this.getClass());
             }
         }

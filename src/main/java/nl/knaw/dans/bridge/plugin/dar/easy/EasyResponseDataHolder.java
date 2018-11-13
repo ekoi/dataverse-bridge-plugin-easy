@@ -1,7 +1,7 @@
-package nl.knaw.dans.dataverse.bridge.plugin.dar.easy;
+package nl.knaw.dans.bridge.plugin.dar.easy;
 
-import nl.knaw.dans.dataverse.bridge.plugin.exception.BridgeException;
-import nl.knaw.dans.dataverse.bridge.plugin.util.StateEnum;
+import nl.knaw.dans.bridge.plugin.lib.exception.BridgeException;
+import nl.knaw.dans.bridge.plugin.lib.util.StateEnum;
 import org.apache.abdera.Abdera;
 import org.apache.abdera.model.Category;
 import org.apache.abdera.model.Document;
@@ -19,11 +19,15 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 
-public class EasyResponseDataHolder implements nl.knaw.dans.dataverse.bridge.plugin.common.IResponseData {
+/*
+    @author Eko Indarto
+ */
+public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.common.IResponseData {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private String state;
     private String pid;
     private String landingPage;
+    private String easyLandingPage;
     private String feedXml;
     private static Abdera abdera = null;
 
@@ -55,23 +59,25 @@ public class EasyResponseDataHolder implements nl.knaw.dans.dataverse.bridge.plu
         Document<Feed> doc = parser.parse(new ByteArrayInputStream(feedXml.getBytes()));
         Feed feed = doc.getRoot();
         List<Category> categories = feed.getCategories("http://purl.org/net/sword/terms/state");
-        if (categories.size() != 1)
+        if (categories.size() != 1) {
+            LOG.error("Fatal Error: Zero or multiples categories. Catagories size:  {}", categories.size());
             throw new BridgeException("Zero or multiples categories. Catagories size:  " + categories.size(), this.getClass());
-        else {
+        } else {
             Category category = categories.get(0);
             state = category.getTerm();
             if (state.equals(StateEnum.ARCHIVED.toString())){
                 List<Entry> entries = feed.getEntries();
                 if (entries.size() != 1) {
-                    throw new BridgeException("Categories size is not equals 1. Size: " + categories.size(), this.getClass());
+                    LOG.error("Fatal Error: Zero or multiples entries. Entries size:  {}", entries.size());
+                    throw new BridgeException("Entries size is not equals 1. Size: " + entries.size(), this.getClass());
                 } else {
+                    easyLandingPage = category.getText();
                     Entry entry = entries.get(0);
                     landingPage = entry.getLink("self").getHref().toString();
                     pid = entry.getLink("self").getHref().getPath().replaceFirst("/", "");
                 }
             } else {
-                String msg = "State is : " + state + " feed: " + feedXml;
-                LOG.debug(msg);
+                LOG.debug("State is : {} \tfeed: {}", state, feedXml);
             }
         }
     }
@@ -94,6 +100,11 @@ public class EasyResponseDataHolder implements nl.knaw.dans.dataverse.bridge.plu
     @Override
     public Optional<String> getLandingPage() {
         return Optional.of(landingPage);
+    }
+
+    @Override
+    public Optional<String> getDarLandingPage() {
+        return Optional.of(easyLandingPage);
     }
 
 }

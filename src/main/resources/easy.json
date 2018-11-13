@@ -1,0 +1,41 @@
+{
+  "dar-name": "EASY",
+  "dar-iri":"http://deasy.dans.knaw.nl/sword2/collection/1",
+  "action-class-name": "nl.knaw.dans.bridge.plugin.dar.easy.EasyIngestAction",
+  "action-class-url": "lib/bridge-plugin-easy-1.0-jar-with-dependencies.jar",
+  "xsl": [{
+    "source": "dataverse",
+    "transformer": [
+      {
+        "xsl-name": "dataset.xml",
+        "xsl-url": "http://localhost:8592/api/v1/xsl/easy/dataverse/dataverseJson-to-easy-dataset.xsl"
+      },
+      {
+        "xsl-name": "files.xml",
+        "xsl-url": "http://localhost:8592/api/v1/xsl/easy/dataverse/dataverseJson-to-easy-files.xsl"
+      },
+      {
+        "xsl-name": "source-files-location",
+        "xsl-url": "http://localhost:8592/api/v1/xsl/easy/dataverse/dataverseJson-to-files-location.xsl"
+      }
+    ]
+  },
+    {
+      "source": "b2share",
+      "transformer": [
+        {
+          "xsl-name": "dataset.xml",
+          "xsl-url": "http://localhost:8592/api/v1/xsl/easy/b2share/b2shareJson-to-easy-dataset.xsl"
+        },
+        {
+          "xsl-name": "files.xml",
+          "xsl-url": "http://localhost:8592/api/v1/xsl/easy/b2share/b2shareJson-to-easy-files.xsl"
+        },
+        {
+          "xsl-name": "source-files-location",
+          "xsl-url": "http://localhost:8592/api/v1/xsl/easy/b2share/b2shareJson-to-files-location.xsl"
+        }
+      ]
+    }
+  ]
+}

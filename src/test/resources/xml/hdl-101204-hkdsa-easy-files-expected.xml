@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files xmlns:dcterms="http://purl.org/dc/terms/"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <file filepath="data/Metadata export from DataverseNL/hdl-101204-hkdsa.json">
+      <dcterms:title>hdl-101204-hkdsa.json</dcterms:title>
+      <dcterms:format>application/json</dcterms:format>
+      <dcterms:accessibleToRights>ANONYMOUS</dcterms:accessibleToRights>
+      <dcterms:visibleToRights>ANONYMOUS</dcterms:visibleToRights>
+   </file>
+   <file filepath="data/cover-achter.jpg">
+      <dcterms:format xsi:type="dcterms:IMT">image/jpeg</dcterms:format>
+      <dcterms:title>cover-achter.jpg</dcterms:title>
+      <dcterms:accessibleToRights>RESTRICTED_REQUEST</dcterms:accessibleToRights>
+      <dcterms:visibleToRights>ANONYMOUS</dcterms:visibleToRights>
+   </file>
+   <file filepath="data/cover-voor.jpg">
+      <dcterms:format xsi:type="dcterms:IMT">image/jpeg</dcterms:format>
+      <dcterms:title>cover-voor.jpg</dcterms:title>
+      <dcterms:accessibleToRights>ANONYMOUS</dcterms:accessibleToRights>
+      <dcterms:visibleToRights>ANONYMOUS</dcterms:visibleToRights>
+   </file>
+</files>
