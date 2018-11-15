@@ -35,7 +35,7 @@ public class EasyTransformerTest {
     @BeforeClass
     public static void setUp() throws Exception {
         easyTransformer = new EasyTransformer();
-        URL metadataUrl = new File("/Users/akmi/git/bridge/bridge-plugin-easy/src/test/resources/json/hdl-101204-hkdsa.json").toURI().toURL();
+        URL metadataUrl = new File("src/test/resources/json/hdl-101204-hkdsa.json").toURI().toURL();
         cleanupTransformfileResult();
 
         URL dvnJsonToEasyDatasetXslUrl = new File("src/test/resources/xsl/dataverseJson-to-easy-dataset.xsl").toURI().toURL();
