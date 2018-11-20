@@ -16,6 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,10 +26,10 @@ import java.util.Optional;
  */
 public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.common.IResponseData {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private String state;
+    private StateEnum state;
     private String pid;
-    private String landingPage;
-    private String easyLandingPage;
+    private URL landingPage;
+    private URL easyLandingPage;
     private String feedXml;
     private static Abdera abdera = null;
 
@@ -64,17 +66,24 @@ public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.co
             throw new BridgeException("Zero or multiples categories. Catagories size:  " + categories.size(), this.getClass());
         } else {
             Category category = categories.get(0);
-            state = category.getTerm();
-            if (state.equals(StateEnum.ARCHIVED.toString())){
+            LOG.info(">>>>>>>>>>>>>", category.getTerm());
+            state = StateEnum.fromValue(category.getTerm());
+            if (state == StateEnum.ARCHIVED){
                 List<Entry> entries = feed.getEntries();
                 if (entries.size() != 1) {
                     LOG.error("Fatal Error: Zero or multiples entries. Entries size:  {}", entries.size());
                     throw new BridgeException("Entries size is not equals 1. Size: " + entries.size(), this.getClass());
                 } else {
-                    easyLandingPage = category.getText();
-                    Entry entry = entries.get(0);
-                    landingPage = entry.getLink("self").getHref().toString();
-                    pid = entry.getLink("self").getHref().getPath().replaceFirst("/", "");
+                    try {
+                        easyLandingPage = new URL(category.getText());
+                        Entry entry = entries.get(0);
+                        landingPage = new URL(entry.getLink("self").getHref().toString());
+                        pid = entry.getLink("self").getHref().getPath().replaceFirst("/", "");
+                    } catch (MalformedURLException e) {
+                        String msg = "init - MalformedURLException, msg: " + e.getMessage();
+                        LOG.info(msg);
+                        throw new BridgeException(msg, e, this.getClass());
+                    }
                 }
             } else {
                 LOG.debug("State is : {} \tfeed: {}", state, feedXml);
@@ -88,7 +97,7 @@ public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.co
     }
 
     @Override
-    public Optional<String> getState() {
+    public Optional<StateEnum> getState() {
         return Optional.of(state);
     }
 
@@ -98,12 +107,12 @@ public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.co
     }
 
     @Override
-    public Optional<String> getLandingPage() {
+    public Optional<URL> getPidLandingPage() {
         return Optional.of(landingPage);
     }
 
     @Override
-    public Optional<String> getDarLandingPage() {
+    public Optional<URL> getDarLandingPage() {
         return Optional.of(easyLandingPage);
     }
 

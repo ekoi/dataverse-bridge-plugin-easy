@@ -7,6 +7,7 @@ import nl.knaw.dans.bridge.plugin.lib.util.StateEnum;
 import org.apache.abdera.i18n.iri.IRI;
 import org.apache.abdera.model.Entry;
 import org.apache.abdera.model.Link;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -72,11 +73,11 @@ public class EasyIngestAction implements IAction {
             LOG.info("Trying to ingest '{}'", bagitZippedFile.getName());
             long bagitZippedFileSize = bagitZippedFile.length();
             LOG.info("Triying to get MD5 for {}", bagitZippedFile.getAbsolutePath());
-            LOG.info("{} has size: {}",bagitZippedFile.getName(), BridgeHelper.formatFileSize(bagitZippedFileSize));
+            LOG.info("{} has size: {}",bagitZippedFile.getName(), FileUtils.byteCountToDisplaySize(bagitZippedFileSize));
             int numberOfChunks = 0;
             if (bagitZippedFileSize > CHUNK_SIZE) {
                 numberOfChunks = getNumberOfChunks(bagitZippedFileSize);
-                LOG.info("The '{}' file will send to EASY in partly, {} times, each {}", bagitZippedFile.getName(), numberOfChunks, BridgeHelper.formatFileSize(CHUNK_SIZE));
+                LOG.info("The '{}' file will send to EASY in partly, {} times, each {}", bagitZippedFile.getName(), numberOfChunks, FileUtils.byteCountToDisplaySize(CHUNK_SIZE));
             }
 
             DigestInputStream dis = getDigestInputStream(bagitZippedFile);
@@ -103,14 +104,14 @@ public class EasyIngestAction implements IAction {
 
             long remaining = bagitZippedFileSize - CHUNK_SIZE;
             if (remaining > 0)
-                LOG.info("Trying to ingest the remaining '{}'", BridgeHelper.formatFileSize(remaining));
+                LOG.info("Trying to ingest the remaining '{}'", FileUtils.byteCountToDisplaySize(remaining));
             else
                 LOG.info("Ingesting is finish.");
             int count = 2;
             numberOfChunks --;
             while (remaining > 0) {
                 checkingTimePeriod += 2000;
-                LOG.info("POST-ing chunk of {} to SE-IRI (remaining: {}) ... [{}]", BridgeHelper.formatFileSize(CHUNK_SIZE), BridgeHelper.formatFileSize(remaining), numberOfChunks);
+                LOG.info("POST-ing chunk of {} to SE-IRI (remaining: {}) ... [{}]", FileUtils.byteCountToDisplaySize(CHUNK_SIZE), FileUtils.byteCountToDisplaySize(remaining), numberOfChunks);
                 response = BridgeHelper.sendChunk(dis, CHUNK_SIZE, "POST", seIri, "bag.zip." + count++, "application/octet-stream", http, remaining > CHUNK_SIZE);
                 numberOfChunks --;
                 remaining -= CHUNK_SIZE;
@@ -132,7 +133,7 @@ public class EasyIngestAction implements IAction {
             IRI statIri = statLink.getHref();
             LOG.info("Stat-IRI = {}", statIri);
             easyResponseDataHolder = trackDeposit(http, statIri.toURI(), checkingTimePeriod, bagitZippedFile.getName());
-            LOG.info(easyResponseDataHolder.getState().get());
+            LOG.info(easyResponseDataHolder.getState().get().toString());
         } catch (FileNotFoundException e) {
             LOG.error("FileNotFoundException: {}", e.getMessage());
             throw new BridgeException("execute - FileNotFoundException, msg: " + e.getMessage(), e, this.getClass());
@@ -185,11 +186,15 @@ public class EasyIngestAction implements IAction {
                     throw new BridgeException(errMsg, this.getClass());
                 }
                 easyResponseDataHolder = new EasyResponseDataHolder(response.getEntity().getContent());
-                String state = easyResponseDataHolder.getState().get();
+                StateEnum state = easyResponseDataHolder.getState().get();
                 LOG.info("[{}] Response state from EASY: {}", filename, state);
-                if (state.equals(StateEnum.ARCHIVED.toString()) || state.equals(StateEnum.INVALID.toString())
-                        || state.equals(StateEnum.REJECTED.toString()) || state.equals(StateEnum.FAILED.toString()))
-                    return easyResponseDataHolder;
+                switch (state) {
+                    case ARCHIVED:
+                    case FAILED:
+                    case REJECTED:
+                    case INVALID:
+                        return easyResponseDataHolder;
+                }
             } catch (InterruptedException e) {
                 LOG.error("InterruptedException, msg: {}", e.getMessage());
                 throw new BridgeException("InterruptedException ", e, this.getClass());

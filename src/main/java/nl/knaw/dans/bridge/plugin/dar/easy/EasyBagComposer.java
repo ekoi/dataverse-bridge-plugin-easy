@@ -8,7 +8,7 @@ import gov.loc.repository.bagit.transformer.impl.ChainingCompleter;
 import gov.loc.repository.bagit.transformer.impl.DefaultCompleter;
 import gov.loc.repository.bagit.transformer.impl.TagManifestCompleter;
 import net.lingala.zip4j.exception.ZipException;
-import nl.knaw.dans.bridge.plugin.lib.bagit.BagInfoCompleter;
+import nl.knaw.dans.bridge.plugin.lib.util.BagInfoCompleter;
 import nl.knaw.dans.bridge.plugin.lib.common.IBagitComposer;
 import nl.knaw.dans.bridge.plugin.lib.common.SourceFile;
 import nl.knaw.dans.bridge.plugin.lib.common.SourceFileList;
@@ -65,7 +65,7 @@ public class EasyBagComposer implements IBagitComposer {
 
     private void downloadFiles(SourceFileList sourceFileList) throws BridgeException {
         LOG.info("*** Starting download files ***");
-        long MAX_FILESIZE = 2147483648L;//EASY support only max 2G each file
+        long MAX_FILESIZE = 2147483648L;//EASY support only max 2G each file, this should be configurable.
 
         String apiToken = sourceFileList.getApiToken();
         LOG.info("downloadFiles - apiToken: {}\tsourceFileList: {}\tsource files size: {}", apiToken, sourceFileList, sourceFileList.getSourceFiles().size());
