@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2018 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package nl.knaw.dans.bridge.plugin.dar.easy;
 
 import nl.knaw.dans.bridge.plugin.lib.common.*;
@@ -32,14 +47,14 @@ import java.util.Optional;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_OK;
 
-/*
-    @author Eko Indarto
+/**
+ * @author Eko Indarto
  */
 public class EasyIngestAction implements IAction {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private ITransform iTransform = new EasyTransformer();
-    private static final int TIMEOUT = 600000; //10 minutes. (Consider to put this in a properties file)
-    private static final int CHUNK_SIZE = 104857600;//100MB. (Consider to put this in a properties file)
+    private static final int TIMEOUT = 600000; // 10 minutes. (Consider to put this in a properties file)
+    private static final int CHUNK_SIZE = 104857600;// 100MB. (Consider to put this in a properties file)
 
     @Override
     public Optional<Map<String, String>> transform(SourceDar sourceDar, DestinationDar destinationDar, List<XslTransformer> xslStreamSource) throws BridgeException {
@@ -54,7 +69,7 @@ public class EasyIngestAction implements IAction {
         LOG.info("EasyIngestAction - starting iTransform.getSourceFileList");
         Optional<SourceFileList> sourceFileList = iTransform.getSourceFileList(sourceDar.getApiToken());
         if (!sourceFileList.isPresent()) {
-            //EASY requires that the original metadata has to include in 'Metadata export from DataverseNL' folder"
+            // EASY requires that the original metadata has to include in 'Metadata export from DataverseNL' folder"
             LOG.error("SourceFileList is not present");
             throw new BridgeException("SourceFileList is not present", this.getClass());
         }
@@ -160,7 +175,6 @@ public class EasyIngestAction implements IAction {
         return (numberOfChunk + x);
     }
 
-
     private DigestInputStream getDigestInputStream(File bagitZipFile) throws FileNotFoundException, NoSuchAlgorithmException {
         FileInputStream fis = new FileInputStream(bagitZipFile);
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -168,7 +182,7 @@ public class EasyIngestAction implements IAction {
     }
 
     private EasyResponseDataHolder trackDeposit(CloseableHttpClient http, URI statUri, long checkingTimePeriod, String filename) throws BridgeException {
-        //filename is just needed for logging convenient especially when a lot of ingest process in the same time.
+        // filename is just needed for logging convenient especially when a lot of ingest process in the same time.
         EasyResponseDataHolder easyResponseDataHolder;
         CloseableHttpResponse response;
         LOG.info("Checking Time Period: {} milliseconds.", checkingTimePeriod);
