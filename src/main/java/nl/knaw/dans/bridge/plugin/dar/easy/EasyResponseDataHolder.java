@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2018 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package nl.knaw.dans.bridge.plugin.dar.easy;
 
 import nl.knaw.dans.bridge.plugin.lib.exception.BridgeException;
@@ -21,8 +36,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-/*
-    @author Eko Indarto
+/**
+ * @author Eko Indarto
  */
 public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.common.IResponseData {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -47,8 +62,8 @@ public class EasyResponseDataHolder implements nl.knaw.dans.bridge.plugin.lib.co
     private void init(InputStream inputStream) throws BridgeException {
         try {
             feedXml = IOUtils.toString(inputStream, "UTF-8");
-            //Eko says, we can validate the feedXml by using javax.xml.validation.Validator
-            //But this simple check is enough for now.
+            // Eko says, we can validate the feedXml by using javax.xml.validation.Validator
+            // But this simple check is enough for now.
             if (feedXml == null || feedXml.isEmpty() ) {
                 LOG.error("feedXml is null or empty");
                 throw new BridgeException("init() - feed is null or empty", this.getClass());
