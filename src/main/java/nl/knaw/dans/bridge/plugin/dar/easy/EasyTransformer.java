@@ -59,8 +59,9 @@ public class EasyTransformer implements ITransform {
     private String addDctermsRightHolder(String datasetXml, String userAffiliation) throws BridgeException {
         try {
             Document datasetXmlDoc =  BridgeHelper.buildDocumentFromString(datasetXml);
-            Node rigthHolderNode = (Node)xPath.evaluate("//*[local-name()='rightsHolder']", datasetXmlDoc, XPathConstants.NODE);
-            rigthHolderNode.setTextContent(userAffiliation);
+            Node rightsHolder = (Node)xPath.evaluate("//*[local-name()='rightsHolder']", datasetXmlDoc, XPathConstants.NODE);
+            if(rightsHolder != null)//this isn't required element.
+                rightsHolder.setTextContent(userAffiliation);
             return BridgeHelper.transform(datasetXmlDoc);
         } catch (XPathExpressionException | ParserConfigurationException | IOException | SAXException |TransformerException e) {
             LOG.error("EasyTransformer - addDctermsRightHolder, causes by: {}", e.getMessage());
