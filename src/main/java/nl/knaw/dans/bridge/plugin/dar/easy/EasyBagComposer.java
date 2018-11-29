@@ -91,13 +91,15 @@ public class EasyBagComposer implements IBagitComposer {
                 throw new BridgeException("downloadFiles - " + errmsg, this.getClass());
             }
             try {
-                LOG.info("**** Starting download public file of '{}' from {}", sourceFile.getName(), sourceFile.getSource());
+                LOG.info("**** Starting download file of '{}' from {}", sourceFile.getName(), sourceFile.getSource());
                 Instant start = Instant.now();
                 URL url;
                 if (sourceFile.isRestricted()) {
                     url = new URL(sourceFile.getSource().replace(API_TOKEN, apiToken));
+                    LOG.info("RESTRICTED FILE: {}", url);
                 } else {
                     url = new URL(sourceFile.getSource());
+                    LOG.info("PUBLIC FILE: {}", url);
                 }
                 File downloadedFile = new File(bagTempDir + "/data/" + sourceFile.getName());
                 FileUtils.copyURLToFile(url,  downloadedFile);
